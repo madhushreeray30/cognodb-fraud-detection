@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fraud Detection Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, rgba(20, 40, 70, 0.8) 0%, rgba(30, 50, 80, 0.8) 100%);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      margin-bottom: 40px;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      text-align: center;
+      backdrop-filter: blur(15px);
+    }
+
+    h1 {
+      color: #ffffff;
+      font-size: 32px;
+      margin: 0 0 8px 0;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      color: #a0a0a0;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background: linear-gradient(135deg, rgba(20, 40, 70, 0.8) 0%, rgba(30, 50, 80, 0.8) 100%);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s, border-color 0.3s;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      backdrop-filter: blur(15px);
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+      border-color: rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, rgba(25, 45, 75, 0.9) 0%, rgba(35, 55, 90, 0.9) 100%);
+    }
+
+    .card h2 {
+      color: #ffffff;
+      font-size: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+    }
+
+    .card-content {
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+      border-top: 1px solid rgba(102, 126, 234, 0.2);
+      border-right: 1px solid rgba(102, 126, 234, 0.1);
+      border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-box:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .stat-label {
+      color: #a0a0a0;
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #7dd3fc;
+    }
+
+    .user-item {
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, rgba(60, 80, 110, 0.4) 0%, rgba(50, 70, 100, 0.3) 100%);
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 3px solid #667eea;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .user-item:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      border-color: rgba(102, 126, 234, 0.3);
+      background: linear-gradient(135deg, rgba(70, 90, 120, 0.5) 0%, rgba(60, 80, 110, 0.4) 100%);
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+
+    .risk-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .risk-high {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .risk-medium {
+      background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+    }
+
+    .risk-low {
+      background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3);
+    }
+
+    .ring-item {
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 111, 0.08) 100%);
+      border-radius: 10px;
+      border-left: 3px solid #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, 0.25);
+      transition: all 0.2s;
+    }
+
+    .ring-item:hover {
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
+      transform: translateX(2px);
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(238, 90, 111, 0.12) 100%);
+    }
+
+    .ring-users {
+      font-weight: 600;
+      color: #ff6b6b;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .ring-amount {
+      color: #a0a0a0;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #666;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #ddd;
+      border-top-color: #667eea;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border-left: 4px solid #c33;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      color: #999;
+    }
+
+    .button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-top: 10px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      font-size: 14px;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .button:active {
+      transform: translateY(0);
+    }
+
+    .button.secondary {
+      background: rgba(102, 126, 234, 0.08);
+      color: #667eea;
+      border: 2px solid rgba(102, 126, 234, 0.2);
+      box-shadow: none;
+    }
+
+    .button.secondary:hover {
+      background: rgba(102, 126, 234, 0.12);
+      border-color: rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+
+    .transaction-item {
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, rgba(60, 80, 110, 0.4) 0%, rgba(50, 70, 100, 0.3) 100%);
+      border-radius: 10px;
+      border-left: 3px solid #667eea;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      transition: all 0.2s;
+    }
+
+    .transaction-item:hover {
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      transform: translateX(2px);
+      background: linear-gradient(135deg, rgba(70, 90, 120, 0.5) 0%, rgba(60, 80, 110, 0.4) 100%);
+    }
+
+    .transaction-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      align-items: center;
+    }
+
+    .transaction-from {
+      font-weight: 600;
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+
+    .transaction-amount {
+      font-weight: 700;
+      color: #7dd3fc;
+    }
+
+    .transaction-time {
+      color: #999;
+      font-size: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-weight: 600;
+      color: #999;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🔍 Fraud Detection Dashboard</h1>
+      <p class="subtitle">Real-time transaction monitoring powered by CognoDB Graph Database</p>
+    </header>
+
+    <div class="dashboard">
+      <!-- High Risk Users Card -->
+      <div class="card">
+        <h2>⚠️ High Risk Users</h2>
+        <div class="card-content" id="highRiskUsersContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- Money Mules Card -->
+      <div class="card">
+        <h2>💰 Money Mule Suspects</h2>
+        <div class="card-content" id="moneyMulesContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- Suspicious Rings Card -->
+      <div class="card">
+        <h2>🔄 Suspicious Transaction Rings</h2>
+        <div class="card-content" id="ringsContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- High Value Transactions Card -->
+      <div class="card">
+        <h2>💳 High-Value Transactions</h2>
+        <div class="card-content" id="transactionsContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph Stats Card -->
+      <div class="card">
+        <h2>📊 Graph Statistics</h2>
+        <div class="card-content">
+          <div class="stat-box">
+            <div class="stat-label">Total Users</div>
+            <div id="totalUsers" class="stat-value">--</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">High Risk Users</div>
+            <div id="highRiskCount" class="stat-value">--</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Flagged Transactions</div>
+            <div id="flaggedTxCount" class="stat-value">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Card -->
+      <div class="card">
+        <h2>🚀 Quick Actions</h2>
+        <div class="card-content">
+          <button class="button" onclick="refreshAllData()">
+            🔄 Refresh Data
+          </button>
+          <button class="button secondary" onclick="showConnectionDetails()">
+            📡 DB Status
+          </button>
+          <button class="button secondary" onclick="exportReport()">
+            📥 Export Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Details -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Details</h2>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+
+    async function fetchData(endpoint) {
+      try {
+        const response = await fetch(`${API_URL}${endpoint}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } catch (error) {
+        console.error(`Error fetching ${endpoint}:`, error);
+        return null;
+      }
+    }
+
+    async function loadHighRiskUsers() {
+      const container = document.getElementById('highRiskUsersContainer');
+      const users = await fetchData('/users');
+
+      if (!users || users.length === 0) {
+        container.innerHTML = '<div class="empty-state">No data available</div>';
+        return;
+      }
+
+      const highRisk = users.filter(u => u.riskScore > 0.7).slice(0, 10);
+
+      if (highRisk.length === 0) {
+        container.innerHTML = '<div class="empty-state">✓ No high-risk users detected</div>';
+        return;
+      }
+
+      container.innerHTML = highRisk.map(user => `
+        <div class="user-item" onclick="showUserDetails('${user.id}')">
+          <div>
+            <div class="user-name">${user.name}</div>
+            <div style="font-size: 12px; color: #999;">${user.status}</div>
+          </div>
+          <span class="risk-badge risk-high">${(user.riskScore * 100).toFixed(0)}%</span>
+        </div>
+      `).join('');
+
+      const highRiskEl = document.getElementById('highRiskCount');
+      if (highRiskEl) highRiskEl.textContent = highRisk.length;
+    }
+
+    async function loadMoneyMules() {
+      const container = document.getElementById('moneyMulesContainer');
+      const mules = await fetchData('/money-mules');
+
+      if (!mules || mules.length === 0) {
+        container.innerHTML = '<div class="empty-state">No money mules detected</div>';
+        return;
+      }
+
+      container.innerHTML = mules.map(mule => `
+        <div class="user-item">
+          <div>
+            <div class="user-name">${mule.name}</div>
+            <div style="font-size: 12px; color: #999;">↔️ ${mule.sentCount}/${mule.receivedCount} transactions</div>
+          </div>
+          <span class="risk-badge risk-high">${(mule.riskScore * 100).toFixed(0)}%</span>
+        </div>
+      `).join('');
+    }
+
+    async function loadSuspiciousRings() {
+      const container = document.getElementById('ringsContainer');
+      const rings = await fetchData('/suspicious-rings');
+
+      if (!rings || rings.length === 0) {
+        container.innerHTML = '<div class="empty-state">✓ No suspicious rings detected</div>';
+        return;
+      }
+
+      container.innerHTML = rings.map((ring, idx) => `
+        <div class="ring-item">
+          <div class="ring-users">${ring.users.join(' → ')} → ${ring.users[0]}</div>
+          <div class="ring-amount">Total: $${ring.totalAmount.toLocaleString()}</div>
+          <button class="button secondary" style="width: 100%; margin-top: 8px;" onclick="showRingDetails(${idx})">
+            View Details
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function loadHighValueTransactions() {
+      const container = document.getElementById('transactionsContainer');
+      const transactions = await fetchData('/high-risk-transactions');
+
+      if (!transactions || transactions.length === 0) {
+        container.innerHTML = '<div class="empty-state">No high-value transactions</div>';
+        return;
+      }
+
+      container.innerHTML = transactions.slice(0, 8).map(tx => `
+        <div class="transaction-item">
+          <div class="transaction-header">
+            <span class="transaction-from">${tx.from} → ${tx.to}</span>
+            <span class="transaction-amount">$${tx.amount.toLocaleString()}</span>
+          </div>
+          <div class="transaction-time">${tx.timestamp}${tx.flagged ? ' 🚩 FLAGGED' : ''}</div>
+        </div>
+      `).join('');
+
+      const flaggedCount = transactions.filter(t => t.flagged).length;
+      const flaggedEl = document.getElementById('flaggedTxCount');
+      if (flaggedEl) flaggedEl.textContent = flaggedCount;
+    }
+
+    async function loadTotalUsers() {
+      const users = await fetchData('/users');
+      if (!users) return;
+
+      const totalEl = document.getElementById('totalUsers');
+      if (totalEl) totalEl.textContent = users.length;
+
+      const highRisk = users.filter(u => u.riskScore > 0.7).length;
+      const highRiskEl = document.getElementById('highRiskCount');
+      if (highRiskEl) highRiskEl.textContent = highRisk;
+    }
+
+    async function loadGraphStats() {
+      const users = await fetchData('/users');
+      const txns = await fetchData('/high-risk-transactions');
+
+      if (users && users.length > 0) {
+        const highRisk = users.filter(u => u.riskScore > 0.7).length;
+        const totalEl = document.getElementById('totalUsers');
+        const highRiskEl = document.getElementById('highRiskCount');
+
+        if (totalEl) totalEl.textContent = users.length;
+        if (highRiskEl) highRiskEl.textContent = highRisk;
+      }
+
+      if (txns && txns.length > 0) {
+        const flagged = txns.filter(t => t.flagged).length;
+        const flaggedEl = document.getElementById('flaggedTxCount');
+        if (flaggedEl) flaggedEl.textContent = flagged;
+      }
+    }
+
+    async function refreshAllData() {
+      // Only set loading state for data cards
+      const dataCards = [
+        'highRiskUsersContainer',
+        'moneyMulesContainer',
+        'ringsContainer',
+        'transactionsContainer'
+      ];
+
+      dataCards.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '<div class="loading"><div class="spinner"></div> Loading...</div>';
+      });
+
+      try {
+        await Promise.all([
+          loadHighRiskUsers(),
+          loadMoneyMules(),
+          loadSuspiciousRings(),
+          loadHighValueTransactions(),
+          loadGraphStats()
+        ]);
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+      }
+    }
+
+    function showUserDetails(userId) {
+      const modal = document.getElementById('detailsModal');
+      const modalBody = document.getElementById('modalBody');
+      document.getElementById('modalTitle').textContent = `User Details: ${userId}`;
+
+      modalBody.innerHTML = '<div class="loading"><div class="spinner"></div> Loading...</div>';
+      modal.classList.add('active');
+
+      fetchData(`/users/${userId}`).then(data => {
+        if (data && data.user) {
+          const user = data.user;
+          modalBody.innerHTML = `
+            <div class="stat-box">
+              <div class="stat-label">User ID</div>
+              <div>${user.id}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Name</div>
+              <div>${user.name}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Risk Score</div>
+              <div>${(user.riskScore * 100).toFixed(0)}%</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Status</div>
+              <div>${user.status}</div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    function showRingDetails(ringIndex) {
+      alert(`Ring ${ringIndex + 1} investigation details would be shown here with full transaction flow visualization.`);
+    }
+
+    function showConnectionDetails() {
+      const modal = document.getElementById('detailsModal');
+      document.getElementById('modalTitle').textContent = 'Database Status';
+
+      fetch(`${API_URL}/health`)
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('modalBody').innerHTML = `
+            <div class="stat-box">
+              <div class="stat-label">Status</div>
+              <div style="color: #28a745; font-weight: bold;">✓ Connected</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Database</div>
+              <div>CognoDB (Neo4j Compatible)</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Last Check</div>
+              <div>${data.timestamp}</div>
+            </div>
+            <p style="margin-top: 20px; color: #666; font-size: 12px;">
+              ✓ All systems operational. The fraud detection system is monitoring transactions in real-time.
+            </p>
+          `;
+          modal.classList.add('active');
+        })
+        .catch(() => {
+          document.getElementById('modalBody').innerHTML = `
+            <div class="error">
+              ⚠️ Failed to connect to the backend server. Make sure the Node.js server is running on port 3000.
+            </div>
+          `;
+          modal.classList.add('active');
+        });
+    }
+
+    async function exportReport() {
+      try {
+        const users = await fetchData('/users');
+        const mules = await fetchData('/money-mules');
+        const rings = await fetchData('/suspicious-rings');
+        const transactions = await fetchData('/high-risk-transactions');
+
+        downloadTextReport(users, mules, rings, transactions);
+        alert('✓ Report exported successfully!');
+      } catch (error) {
+        console.error('Error exporting report:', error);
+        alert('Error generating report. Please try again.');
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('detailsModal').classList.remove('active');
+    }
+
+    function downloadTextReport(users, mules, rings, transactions) {
+      let report = '=== FRAUD DETECTION REPORT ===\n\n';
+      report += `Generated: ${new Date().toLocaleString()}\n\n`;
+
+      report += '--- SUMMARY ---\n';
+      if (users) {
+        const highRisk = users.filter(u => u.riskScore > 0.7).length;
+        report += `Total Users: ${users.length}\n`;
+        report += `High Risk Users: ${highRisk}\n`;
+      }
+      if (rings) report += `Suspicious Rings: ${rings.length}\n`;
+      if (transactions) {
+        const flagged = transactions.filter(t => t.flagged).length;
+        report += `Flagged Transactions: ${flagged}\n`;
+      }
+      if (mules) report += `Money Mule Suspects: ${mules.length}\n`;
+
+      report += '\n--- HIGH RISK USERS ---\n';
+      if (users) {
+        users.filter(u => u.riskScore > 0.7).slice(0, 10).forEach(user => {
+          report += `• ${user.name} - Risk: ${(user.riskScore * 100).toFixed(0)}% (${user.status})\n`;
+        });
+      }
+
+      report += '\n--- MONEY MULE SUSPECTS ---\n';
+      if (mules) {
+        mules.slice(0, 10).forEach(mule => {
+          report += `• ${mule.name} - Sent: ${mule.sentCount}, Received: ${mule.receivedCount}\n`;
+        });
+      }
+
+      report += '\n--- SUSPICIOUS RINGS ---\n';
+      if (rings) {
+        rings.slice(0, 5).forEach((ring, idx) => {
+          report += `Ring ${idx + 1}: ${ring.users.join(' → ')} → ${ring.users[0]}\n`;
+          report += `  Total: $${ring.totalAmount.toLocaleString()}\n`;
+        });
+      }
+
+      // Download as text file
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(report));
+      element.setAttribute('download', `fraud-detection-report-${new Date().toISOString().split('T')[0]}.txt`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
+
+    function restoreQuickActions() {
+      const qa = document.querySelector('[onclick*="refreshAllData"]')?.closest('.card')?.querySelector('.card-content');
+      if (qa) {
+        qa.innerHTML = `
+          <button class="button" onclick="refreshAllData()">
+            🔄 Refresh Data
+          </button>
+          <button class="button secondary" onclick="showConnectionDetails()">
+            📡 DB Status
+          </button>
+          <button class="button secondary" onclick="exportReport()">
+            📥 Export Report
+          </button>
+        `;
+      }
+    }
+
+    // Load all data on page load
+    window.addEventListener('load', async () => {
+      await refreshAllData();
+      restoreQuickActions();
+    });
+
+    // Auto-refresh every 30 seconds
+    setInterval(async () => {
+      await refreshAllData();
+      restoreQuickActions();
+    }, 30000);
+  </script>
+</body>
+</html>

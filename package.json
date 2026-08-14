@@ -1,0 +1,22 @@
+{
+  "name": "fraud-detection-graph",
+  "version": "1.0.0",
+  "description": "Real-time fraud detection using CognoDB graph database",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "seed": "cd backend && npm run seed",
+    "install-all": "npm install && cd backend && npm install"
+  },
+  "keywords": [
+    "fraud-detection",
+    "graph-database",
+    "cognodb",
+    "neo4j",
+    "cypher",
+    "money-laundering"
+  ],
+  "author": "",
+  "license": "MIT"
+}
