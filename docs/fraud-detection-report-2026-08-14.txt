@@ -1,0 +1,28 @@
+=== FRAUD DETECTION REPORT ===
+
+Generated: 8/15/2026, 12:14:32 AM
+
+--- SUMMARY ---
+Total Users: 10
+High Risk Users: 5
+Suspicious Rings: 3
+Flagged Transactions: 7
+Money Mule Suspects: 1
+
+--- HIGH RISK USERS ---
+• Jack Sparrow - Risk: 95% (HIGH_RISK)
+• Henry Ford - Risk: 92% (HIGH_RISK)
+• Iris West - Risk: 88% (FLAGGED)
+• Frank Castle - Risk: 85% (FLAGGED)
+• Grace Hopper - Risk: 78% (FLAGGED)
+
+--- MONEY MULE SUSPECTS ---
+• Frank Castle - Sent: 3, Received: 3
+
+--- SUSPICIOUS RINGS ---
+Ring 1: Frank Castle → Grace Hopper → Henry Ford → Frank Castle
+  Total: $44,300
+Ring 2: Grace Hopper → Henry Ford → Frank Castle → Grace Hopper
+  Total: $44,300
+Ring 3: Henry Ford → Frank Castle → Grace Hopper → Henry Ford
+  Total: $44,300

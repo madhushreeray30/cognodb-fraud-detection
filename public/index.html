@@ -497,7 +497,9 @@
   </div>
 
   <script>
-    const API_URL = '/api';
+    const API_URL =
+    window.location.port === '8080'? 'http://localhost:3000/api': '/api';
+    let suspiciousRings = [];
 
     async function fetchData(endpoint) {
       try {
@@ -561,8 +563,10 @@
     }
 
     async function loadSuspiciousRings() {
-      const container = document.getElementById('ringsContainer');
-      const rings = await fetchData('/suspicious-rings');
+    const container = document.getElementById('ringsContainer');
+    const rings = await fetchData('/suspicious-rings');
+
+    suspiciousRings = rings || [];
 
       if (!rings || rings.length === 0) {
         container.innerHTML = '<div class="empty-state">✓ No suspicious rings detected</div>';
@@ -697,7 +701,65 @@
     }
 
     function showRingDetails(ringIndex) {
-      alert(`Ring ${ringIndex + 1} investigation details would be shown here with full transaction flow visualization.`);
+      const ring = suspiciousRings[ringIndex];
+
+      if (!ring) {
+        return;
+      }
+
+      const modal = document.getElementById('detailsModal');
+      const modalBody = document.getElementById('modalBody');
+
+      document.getElementById('modalTitle').textContent =
+        `Suspicious Transaction Ring ${ringIndex + 1}`;
+
+      const users = ring.users || [];
+
+      const flow = users.map((user, index) => {
+        const nextUser = users[(index + 1) % users.length];
+
+        return `
+          <div class="stat-box">
+            <div class="stat-label">Transaction ${index + 1}</div>
+            <div style="font-size: 16px; font-weight: 600;">
+              ${user} → ${nextUser}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      modalBody.innerHTML = `
+        <div class="stat-box">
+          <div class="stat-label">Pattern Detected</div>
+          <div style="color: #ff6b6b; font-weight: bold;">
+            🔄 Circular Transaction Ring
+          </div>
+        </div>
+
+        <div class="stat-box">
+          <div class="stat-label">Transaction Flow</div>
+          <div style="font-size: 16px; font-weight: 600;">
+            ${users.join(' → ')} → ${users[0]}
+          </div>
+        </div>
+
+        ${flow}
+
+        <div class="stat-box">
+          <div class="stat-label">Total Transaction Amount</div>
+          <div style="font-size: 24px; color: #61dafb; font-weight: bold;">
+            $${Number(ring.totalAmount).toLocaleString()}
+          </div>
+        </div>
+
+        <div style="margin-top: 15px; padding: 12px; border-radius: 8px;
+                    background: rgba(255, 107, 107, 0.1);">
+          ⚠️ This circular flow may indicate layering or money-laundering
+          activity and should be investigated.
+        </div>
+      `;
+
+      modal.classList.add('active');
     }
 
     function showConnectionDetails() {
